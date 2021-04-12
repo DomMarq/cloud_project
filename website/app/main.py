@@ -19,5 +19,8 @@ async def create_upload_file(request: Request, file: UploadFile = File(...)):
     # Process results here, place in results var
     # Should use async if at all possible, following
     # https://fastapi.tiangolo.com/async/
-    results = {"test": "Hello, world!"}
+    results = {"filename": file.filename}
     return templates.TemplateResponse("results.html", {"request":request, "results": results})
+
+# docker build -t fastapi:latest .
+# docker run -p 9372:9372 fastapi:latest
