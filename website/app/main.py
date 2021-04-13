@@ -24,3 +24,4 @@ async def create_upload_file(request: Request, file: UploadFile = File(...)):
 
 # docker build -t fastapi:latest .
 # docker run -p 9372:9372 fastapi:latest
+# https://medium.com/@meetakoti.kirankumar/deploying-fastapi-web-application-in-aws-a1995675087d
