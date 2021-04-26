@@ -1,3 +1,8 @@
 fastapi
 jinja2
 python-multipart
+tensorflow
+numpy
+pandas
+keras
+Pillow

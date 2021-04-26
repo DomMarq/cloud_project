@@ -13,10 +13,10 @@ from keras.layers import MaxPooling2D
 from keras.layers import Dense
 from keras.layers import Flatten
 import time as timer
+print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
-# start timing 
+# start timing
 start_time = timer.time()
-
 # for xray data
 data_dir = 'data/xrays/'
 image_dir = data_dir + 'data/'
@@ -52,7 +52,7 @@ feature_description = {}
 
 for elem in list(df.columns)[2:]:
     feature_description[elem] = tf.io.FixedLenFeature([], tf.int64)
-    
+
 feature_description['image'] = tf.io.FixedLenFeature([], tf.string)
 
 BATCH_SIZE = 64
@@ -62,15 +62,16 @@ AUTOTUNE = tf.data.experimental.AUTOTUNE
 
 
 def read_tfrecord(example):
+    print("example:  ", example)
     example = tf.io.parse_single_example(example, feature_description)
     image = tf.io.decode_jpeg(example["image"], channels=3)
     image = tf.image.resize(image, IMAGE_SIZE)
     image = tf.cast(image, tf.float32) / 255.0
-    
+
     label = []
-    
+
     for val in heads: label.append(example[val])
-    
+
     return image, label
 
 def load_dataset(filenames):
@@ -79,7 +80,7 @@ def load_dataset(filenames):
     dataset = tf.data.TFRecordDataset(filenames)
     dataset = dataset.with_options(ignore_order)
     dataset = dataset.map(read_tfrecord)
-    
+
     return dataset
 
 def get_dataset(filenames):
@@ -87,7 +88,7 @@ def get_dataset(filenames):
     dataset = dataset.shuffle(2048)
     dataset = dataset.prefetch(buffer_size=AUTOTUNE)
     dataset = dataset.batch(BATCH_SIZE)
-    
+
     return dataset
 
 train_dataset = get_dataset(TRAINING_FILENAMES)
@@ -95,83 +96,88 @@ valid_dataset = get_dataset(VALID_FILENAMES)
 test_dataset = get_dataset(TEST_FILENAMES)
 
 print(train_dataset)
-
-image_viz, label_viz = next(iter(train_dataset))
-val_image_viz, val_label_viz = next(iter(valid_dataset))
-
-train_images = image_viz.numpy()
-train_labels = label_viz.numpy()
-
-# defining learning rate and early stop parameters
-initial_learning_rate = 0.01
-lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
-    initial_learning_rate, decay_steps=5, decay_rate=0.96, staircase=True
-)
-
-
-def define_model(in_shape=(IMAGE_SIZE[0], IMAGE_SIZE[1], 3), out_shape=len(heads)):
-    model = Sequential()
-    model.add(Conv2D(32, (3, 3), activation='relu', kernel_initializer='he_uniform', padding='same', input_shape=in_shape))
-    model.add(Conv2D(32, (3, 3), activation='relu', kernel_initializer='he_uniform', padding='same'))
-    model.add(MaxPooling2D((2, 2)))
-    model.add(Conv2D(64, (3, 3), activation='relu', kernel_initializer='he_uniform', padding='same'))
-    model.add(Conv2D(64, (3, 3), activation='relu', kernel_initializer='he_uniform', padding='same'))
-    model.add(MaxPooling2D((2, 2)))
-    model.add(Conv2D(128, (3, 3), activation='relu', kernel_initializer='he_uniform', padding='same'))
-    model.add(Conv2D(128, (3, 3), activation='relu', kernel_initializer='he_uniform', padding='same'))
-    model.add(MaxPooling2D((2, 2)))
-    model.add(Flatten())
-    model.add(Dense(128, activation='relu', kernel_initializer='he_uniform'))
-    model.add(Dense(out_shape, activation='sigmoid'))
-
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=lr_schedule),
-                  loss='binary_crossentropy',
-                  metrics=[tf.keras.metrics.AUC(name="auc")])
-    return model
-
-train_size = sum(1 for _ in tf.data.TFRecordDataset(TRAINING_FILENAMES))
-validation_size = sum(1 for _ in tf.data.TFRecordDataset(VALID_FILENAMES))
+print("test_dataset:")
+print(test_dataset)
+# image_viz, label_viz = next(iter(train_dataset))
+# val_image_viz, val_label_viz = next(iter(valid_dataset))
+#
+# train_images = image_viz.numpy()
+# train_labels = label_viz.numpy()
+#
+# # defining learning rate and early stop parameters
+# initial_learning_rate = 0.01
+# lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
+#     initial_learning_rate, decay_steps=5, decay_rate=0.96, staircase=True
+# )
 
 
-epoch_steps = int(np.ceil(train_size/BATCH_SIZE))
-validation_steps = int(np.ceil(validation_size/BATCH_SIZE))
+# def define_model(in_shape=(IMAGE_SIZE[0], IMAGE_SIZE[1], 3), out_shape=len(heads)):
+#     model = Sequential()
+#     model.add(Conv2D(32, (3, 3), activation='relu', kernel_initializer='he_uniform', padding='same', input_shape=in_shape))
+#     model.add(Conv2D(32, (3, 3), activation='relu', kernel_initializer='he_uniform', padding='same'))
+#     model.add(MaxPooling2D((2, 2)))
+#     model.add(Conv2D(64, (3, 3), activation='relu', kernel_initializer='he_uniform', padding='same'))
+#     model.add(Conv2D(64, (3, 3), activation='relu', kernel_initializer='he_uniform', padding='same'))
+#     model.add(MaxPooling2D((2, 2)))
+#     model.add(Conv2D(128, (3, 3), activation='relu', kernel_initializer='he_uniform', padding='same'))
+#     model.add(Conv2D(128, (3, 3), activation='relu', kernel_initializer='he_uniform', padding='same'))
+#     model.add(MaxPooling2D((2, 2)))
+#     model.add(Flatten())
+#     model.add(Dense(128, activation='relu', kernel_initializer='he_uniform'))
+#     model.add(Dense(out_shape, activation='sigmoid'))
+#
+#     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=lr_schedule),
+#                   loss='binary_crossentropy',
+#                   metrics=[tf.keras.metrics.AUC(name="auc")])
+#     return model
+#
+# train_size = sum(1 for _ in tf.data.TFRecordDataset(TRAINING_FILENAMES))
+# validation_size = sum(1 for _ in tf.data.TFRecordDataset(VALID_FILENAMES))
 
-epochs = 5
 
-print("steps_per_epoch: " + str(epoch_steps))
-print("validation_steps: " + str(validation_steps))
-
-
-# save checkpoints during training
-checkpoint_path = "training_1/cp.ckpt"
-checkpoint_dir = os.path.dirname(checkpoint_path)
-
-model_path = "saved_model"
-model_dir = os.path.dirname(model_path)
+# epoch_steps = int(np.ceil(train_size/BATCH_SIZE))
+# validation_steps = int(np.ceil(validation_size/BATCH_SIZE))
+#
+# epochs = 5
+#
+# print("steps_per_epoch: " + str(epoch_steps))
+# print("validation_steps: " + str(validation_steps))
+#
+#
+# # save checkpoints during training
+# checkpoint_path = "training_1/cp.ckpt"
+# checkpoint_dir = os.path.dirname(checkpoint_path)
+#
+# model_path = "saved_model"
+# model_dir = os.path.dirname(model_path)
 
 # Create a callback that saves the model's weights
-cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
-                                                 save_weights_only=True,
-                                                 verbose=1)
+# cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
+#                                                  save_weights_only=True,
+#                                                  verbose=1)
 
 
-model = define_model()
-
-history = model.fit(
-    train_dataset,
-    epochs=epochs,
-    validation_data=valid_dataset,
-    validation_steps = validation_steps,
-    callbacks=cp_callback
-)
-
-# save model
-model.save('saved_model/my_model')
+# model = define_model()
+#
+# history = model.fit(
+#     train_dataset,
+#     epochs=epochs,
+#     validation_data=valid_dataset,
+#     validation_steps = validation_steps,
+#     callbacks=cp_callback
+# )
+#
+# # save model
+# model.save('saved_model/my_model')
 
 # model evaluation
-_, test_auc = model.evaluate(test_dataset, verbose=0)
-print('Test auc:', test_auc)
+# _, test_auc = model.evaluate(test_dataset, verbose=0)
+# print('Test auc:', test_auc)
 
+new_model = tf.keras.models.load_model('saved_model/my_model')
+print("model loaded. Predicting...")
+results = new_model.predict(test_dataset, use_multiprocessing=True)
+print(results[:5])
 # end time
 end_time = timer.time()
 time = end_time - start_time
