@@ -43,16 +43,24 @@ data = read_tfrecord(data)
 
 # Call model on data
 results = new_model.predict(data, use_multiprocessing=True)
+print('\n------------------------------------------------')
+print('Probabilities:')
+print(results)
 
+# determine max prob, change to say yes for all probs over 0.1?
+maximum = np.argmax(results)
 options = list(df.columns)[2:]
-diagnosis = []
+print("\nDiagnosis:")
+print(options[maximum])
 
-# 0.17 minimum
-for i, result in enumerate(results[0]):
-    if result >= 0.17:
-        diagnosis.append(options[i])
+for i, row in df.iterrows():
+    if image_name == row[0][-16:]:
+        # check for correctness
+        for i, col in enumerate(row):
+            if i-2 == maximum:
+                if col:
+                    print('\nCorrect prediction!')
+                else:
+                    print('\nIncorrect prediction!')
+                print('------------------------------------------------')
 
-if not diagnosis:
-    diagnosis.append('No finding')
-
-print(diagnosis)
