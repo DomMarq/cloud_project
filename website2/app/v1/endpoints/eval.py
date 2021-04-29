@@ -14,7 +14,11 @@ async def create_upload_file(request: Request, file: UploadFile = File(...)):
     # https://fastapi.tiangolo.com/async/
     f = open("images/image.png", "wb+")
     f.write(file.file.read())
+    filename = file.filename
+    file.close()
+    f.close()
     result = os.popen("python3 run_model.py images/image.png")
+    os.remove("images/image.png")
     print("file recieved: ", file.filename)
-    results = {"filename": file.filename, "type": file.content_type, "result": result.read()}
+    results = {"filename": file.filename, "result": result.read()}
     return templates.TemplateResponse("results.html", {"request":request, "results": results})
