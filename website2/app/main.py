@@ -17,9 +17,7 @@ async def main():
         return HTMLResponse(content=content)
 
 
-# docker build -t fastapi:latest .
-# docker run -p 9372:9372 fastapi:latest
-# https://medium.com/@meetakoti.kirankumar/deploying-fastapi-web-application-in-aws-a1995675087d
+# https://towardsdatascience.com/fastapi-aws-robust-api-part-1-f67ae47390f9
 handler = Mangum(app=app)
 
-# curl -i -X POST -H "Content-Type: multipart/form-data" -F "file=@package.sh" https://kx0v87byqj.execute-api.us-east-1.amazonaws.com/dev/v1/uploadfile
+# curl -i -X POST -H "Content-Type: multipart/form-data" -F "file=@image.png" https://kx0v87byqj.execute-api.us-east-1.amazonaws.com/dev/v1/uploadfile

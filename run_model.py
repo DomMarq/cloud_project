@@ -3,7 +3,6 @@ import sys
 import pandas as pd
 import tensorflow as tf
 from tensorflow import keras
-import numpy as np
 
 print(tf.version.VERSION)
 new_model = tf.keras.models.load_model('saved_model/my_model')
@@ -34,8 +33,9 @@ def read_tfrecord(image):
 
 # Directories
 data_dir = 'data/xrays/'
-image_dir = data_dir + 'raw_images/'
-filename = image_dir + image_name
+# image_dir = data_dir + 'raw_images/'
+# filename = image_dir + image_name
+filename = image_name
 
 # Process data
 data = tf.io.read_file(filename)
