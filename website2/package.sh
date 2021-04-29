@@ -1,3 +1,4 @@
+# run this to package the site and ready for deployment
 rm lambda.zip
 root_dir=$(pwd)
 venv_dir="$root_dir/venv/lib/python3.8/site-packages"
