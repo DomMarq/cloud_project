@@ -19,7 +19,7 @@ async def create_upload_file(request: Request, file: UploadFile = File(...)):
     print("file recieved: ", file.filename)
     print("content type: ", file.content_type)
     bytes = await file.read()
-    if len(bytes) > 500000:
+    if len(bytes) > 600000:
         bytes = base64.decode(bytes)
     print("File length: ", len(bytes))
     result = run_model_lite.predict_image(bytes)
