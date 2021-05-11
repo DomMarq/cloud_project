@@ -130,3 +130,7 @@ dmypy.json
 
 # ignore tfrec files/images
 *.tfrec
+*.png
+
+# ignore aws credentials
+*.pem
