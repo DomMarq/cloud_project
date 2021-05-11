@@ -1,0 +1,8 @@
+jinja2
+python-multipart
+fastapi
+mangum
+uvicorn
+numpy
+Pillow
+tflite_runtime-2.4.0-py3-none-any.whl
