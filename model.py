@@ -15,8 +15,9 @@ from keras.layers import Flatten
 import time as timer
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
-# start timing
-start_time = timer.time()
+# start timing 
+start_train_time = timer.time()
+
 # for xray data
 data_dir = 'data/xrays/'
 image_dir = data_dir + 'data/'
@@ -152,40 +153,51 @@ print(test_dataset)
 # model_dir = os.path.dirname(model_path)
 
 # Create a callback that saves the model's weights
-# cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
-#                                                  save_weights_only=True,
-#                                                  verbose=1)
+
+cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
+                                                 save_weights_only=True,
+                                                 verbose=1)
 
 
-# model = define_model()
-#
-# history = model.fit(
-#     train_dataset,
-#     epochs=epochs,
-#     validation_data=valid_dataset,
-#     validation_steps = validation_steps,
-#     callbacks=cp_callback
-# )
-#
-# # save model
-# model.save('saved_model/my_model')
+model = define_model()
+
+history = model.fit(
+    train_dataset,
+    epochs=epochs,
+    validation_data=valid_dataset,
+    validation_steps = validation_steps,
+    callbacks=cp_callback
+)
+
+# end time
+end_train_time = timer.time()
+train_time = end_train_time - start_train_time
+train_day = train_time // (24 * 3600)
+train_time = train_time % (24 * 3600)
+train_hour = train_time // 3600
+train_time %= 3600
+train_minutes = train_time // 60
+train_time %= 60
+train_seconds = np.round(train_time,0)
+print(f"Total model execution time: {train_day} days, {train_hour} hours, {train_minutes} minutes, {train_seconds} seconds")
 
 # model evaluation
-# _, test_auc = model.evaluate(test_dataset, verbose=0)
-# print('Test auc:', test_auc)
+start_eval_time = timer.time()
+_, test_auc = model.evaluate(test_dataset, verbose=0)
+print('Test auc:', test_auc)
 
-new_model = tf.keras.models.load_model('saved_model/my_model')
-print("model loaded. Predicting...")
-results = new_model.predict(test_dataset, use_multiprocessing=True)
-print(results[:5])
-# end time
-end_time = timer.time()
-time = end_time - start_time
-day = time // (24 * 3600)
-time = time % (24 * 3600)
-hour = time // 3600
-time %= 3600
-minutes = time // 60
-time %= 60
-seconds = np.round(time,0)
-print(f"Total code execution time: {day} days, {hour} hours, {minutes} minutes, {seconds} seconds")
+end_eval_time = timer.time()
+eval_time = end_eval_time - start_eval_time
+eval_day = eval_time // (24 * 3600)
+eval_time = eval_time % (24 * 3600)
+eval_hour = eval_time // 3600
+eval_time %= 3600
+eval_minutes = eval_time // 60
+eval_time %= 60
+eval_seconds = np.round(eval_time,0)
+print(f"Total evaluation execution time: {eval_day} days, {eval_hour} hours, {eval_minutes} minutes, {eval_seconds} seconds")
+
+
+# save model
+model.save('saved_model/my_model_10')
+
